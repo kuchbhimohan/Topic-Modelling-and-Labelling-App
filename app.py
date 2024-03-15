@@ -9,6 +9,7 @@ from pytube import YouTube
 from pathlib import Path
 import shutil
 import pandas as pd
+import os
 
 #### topic labeling ##########
 
@@ -74,6 +75,19 @@ industries = {
 #     # Return the industry with the highest count
 #     return max(counts, key=counts.get)
 
+def check_and_delete_media_files():
+    directory = os.getcwd()  # Get the current working directory
+
+    audio_files = [file for file in os.listdir(directory) if file.endswith(('.mp3', '.wav', '.ogg', '.flac', '.aac'))]
+    video_files = [file for file in os.listdir(directory) if file.endswith(('.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv'))]
+
+    if audio_files or video_files:
+        for file in audio_files + video_files:
+            os.remove(os.path.join(directory, file))
+        print("Media files deleted successfully!")
+    else:
+        print("No audio or video files found.")
+check_and_delete_media_files()
 def label_topic(text):
     """
     Given a piece of text, this function returns the top two industry labels that best match the topics discussed in the text.
@@ -141,6 +155,7 @@ def save_video(url, video_filename):
         print("An error has occurred")
     print("Download is completed successfully")
     
+    
     return video_filename
 
 def save_audio(url):
@@ -159,11 +174,15 @@ def save_audio(url):
     print(yt.title + " Has been successfully downloaded")
     return yt.title, audio_filename, video_filename
 
-
 def audio_to_transcript(audio_file):
+    print(1)
     model = load_model()
-    result = whisper.transcribe(model, audio_file)
+    print(1)
+    print(audio_file)
+    result = model.transcribe(audio_file)
+    print(1)
     transcript = result["text"]
+    print(1)
     return transcript
     
 st.set_page_config(layout="wide")
@@ -201,6 +220,7 @@ if choice == "On Text":
                 st.write(industry)
             
 elif choice == "On Video":
+    # check_and_delete_media_files()
     st.subheader("Topic Modeling and Labeling on Video")
     url =  st.text_input('Enter URL of YouTube video:')
     # if upload_video is not None:
